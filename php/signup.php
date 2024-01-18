@@ -1,5 +1,3 @@
-
-
 <?php
 /*  1. Receives input from a user registration form (first name, last name, email, password, and an image file).
     2. Validates that all fields are filled and the email is in the correct format.
