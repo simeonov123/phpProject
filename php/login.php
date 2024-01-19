@@ -30,7 +30,7 @@ if (!empty($email) && !empty($password)) {
             $status = "Active now";
             //If authentication is successful, updates the user's status in the database to "Active now".
             $sql2 = mysqli_query($conn, "UPDATE users SET status = '{$status}' WHERE unique_id = {$row['unique_id']}");
-           
+
             //Session Management
             if ($sql2) {
                 //Sets a session variable unique_id with the user's identifier from the database.

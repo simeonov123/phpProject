@@ -1,5 +1,10 @@
 <?php
+/*
+  Session Start and Redirect
+*/
+//This function starts a new session or resumes an existing session
 session_start();
+//This checks if a session variable unique_id is set. If it is, the script redirects the user to users.php
 if (isset($_SESSION['unique_id'])) {
   header("location: users.php");
 }
@@ -29,8 +34,9 @@ if (isset($_SESSION['unique_id'])) {
       <div class="link">Not yet signed up? <a href="index.php">Signup now</a></div>
     </section>
   </div>
-
+  <!-- handles the functionality to show or hide the password. -->
   <script src="javascript/pass-show-hide.js"></script>
+  <!-- handles the login process of sending it to the server. -->
   <script src="javascript/login.js"></script>
 
 </body>

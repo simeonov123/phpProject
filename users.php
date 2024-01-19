@@ -50,7 +50,7 @@ if (!isset($_SESSION['unique_id'])) {
       </div>
       <!-- User List Container -->
       <div class="users-list">
-          <!-- A container where the list of users will be dynamically inserted via JavaScript.-->
+        <!-- A container where the list of users will be dynamically inserted via JavaScript.-->
       </div>
     </section>
   </div>
