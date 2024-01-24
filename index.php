@@ -1,10 +1,15 @@
 <?php
-//Initializes a new session or resumes an existing one.
+/*
+  Session Start and Redirect
+*/
+// Start or resume a session.
 session_start();
-//conditional statement checks if the session variable unique_id is set (indicating an already logged-in user) 
-//and redirects such users to users.php
+
+// Check if the session variable unique_id is set.
 if (isset($_SESSION['unique_id'])) {
+  // Redirect the user to users.php if already logged in.
   header("location: users.php");
+  exit(); // Terminate script execution to prevent further processing.
 }
 ?>
 
@@ -47,9 +52,9 @@ if (isset($_SESSION['unique_id'])) {
     </section>
   </div>
 
-  <!--  Manages the show/hide functionality of the password field. -->
+  <!-- Manages the show/hide functionality of the password field. -->
   <script src="javascript/pass-show-hide.js"></script>
-  <!-- Handles the client-side logic of the signup process -->
+  <!-- Handles the client-side logic of the signup process. -->
   <script src="javascript/signup.js"></script>
 
 </body>

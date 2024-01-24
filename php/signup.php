@@ -1,15 +1,17 @@
 <?php
-/*  1. Receives input from a user registration form (first name, last name, email, password, and an image file).
-    2. Validates that all fields are filled and the email is in the correct format.
-    3. Checks if the email already exists in the users table in the database.
-    4. Handles the image upload by checking the file extension and MIME type, then moves the file to a permanent location.
-    5. Encrypts the password using MD5.
-    6. Inserts the new user into the database.
-    7. Sets a session variable for the newly created user ID and returns "success" if all operations are successful.
+/*
+    This PHP script receives input from a user registration form (first name, last name, email, password, and an image file) and performs several tasks:
+    1. Validates that all fields are filled and the email is in the correct format.
+    2. Checks if the email already exists in the users table in the database.
+    3. Handles the image upload by checking the file extension and MIME type, then moves the file to a permanent location.
+    4. Encrypts the password using bcrypt.
+    5. Inserts the new user into the database.
+    6. Sets a session variable for the newly created user ID and returns "success" if all operations are successful.
 */
 
 // Start a new session or resume the existing session
 session_start();
+
 // Include the database configuration file
 include_once "config.php";
 
@@ -26,7 +28,7 @@ if (!empty($fname) && !empty($lname) && !empty($email) && !empty($password)) {
         // Check if the email already exists in the database
         $sql = mysqli_query($conn, "SELECT * FROM users WHERE email = '{$email}'");
         if (mysqli_num_rows($sql) > 0) {
-            echo "$email - This email already exist!";
+            echo "$email - This email already exists!";
         } else {
             // Check if an image file was uploaded
             if (isset($_FILES['image'])) {
@@ -56,11 +58,11 @@ if (!empty($fname) && !empty($lname) && !empty($email) && !empty($password)) {
                             $ran_id = rand(time(), 100000000);
                             // Set the user's status
                             $status = "Active now";
-                            // Encrypt the password
-                            $encrypt_pass = md5($password);
+                            // Hash the password using bcrypt
+                            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
                             // Insert the new user into the database
                             $insert_query = mysqli_query($conn, "INSERT INTO users (unique_id, fname, lname, email, password, img, status)
-                                VALUES ({$ran_id}, '{$fname}','{$lname}', '{$email}', '{$encrypt_pass}', '{$new_img_name}', '{$status}')");
+                                VALUES ({$ran_id}, '{$fname}','{$lname}', '{$email}', '{$hashed_password}', '{$new_img_name}', '{$status}')");
                             if ($insert_query) {
                                 // Retrieve the new user from the database
                                 $select_sql2 = mysqli_query($conn, "SELECT * FROM users WHERE email = '{$email}'");
@@ -70,7 +72,7 @@ if (!empty($fname) && !empty($lname) && !empty($email) && !empty($password)) {
                                     $_SESSION['unique_id'] = $result['unique_id'];
                                     echo "success";
                                 } else {
-                                    echo "This email address not Exist!";
+                                    echo "This email address does not exist!";
                                 }
                             } else {
                                 echo "Something went wrong. Please try again!";
