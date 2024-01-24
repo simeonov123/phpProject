@@ -1,13 +1,14 @@
 <?php
-//Initializes a new session or resumes the existing one.
+// Initializes a new session or resumes the existing one.
 session_start();
-//Includes the configuration file with the db connection.
+// Includes the configuration file with the DB connection.
 include_once "php/config.php";
 
-//Session Check and Redirect
-//checks if the unique_id session variable is not set, indicating the user is not logged in, and redirects them to the login page.
+// Session Check and Redirect
+// Checks if the unique_id session variable is not set, indicating the user is not logged in, and redirects them to the login page.
 if (!isset($_SESSION['unique_id'])) {
   header("location: login.php");
+  exit; // Exit to prevent further execution
 }
 ?>
 <?php include_once "header.php"; ?>
@@ -18,23 +19,27 @@ if (!isset($_SESSION['unique_id'])) {
     <section class="chat-area">
       <header>
         <?php
-        //User Information Retrieval
-        //Fetches the user_id from the GET request and performs a SQL query to retrieve the user's details from the database.
-        $user_id = mysqli_real_escape_string($conn, $_GET['user_id']);
-        $sql = mysqli_query($conn, "SELECT * FROM users WHERE unique_id = {$user_id}");
-        //If the user is found, their details are stored in $row; otherwise, the user is redirected to users.php.
-        if (mysqli_num_rows($sql) > 0) {
-          $row = mysqli_fetch_assoc($sql);
+        // User Information Retrieval
+        // Fetches the user_id from the GET request and performs a SQL query to retrieve the user's details from the database.
+        $user_id = (int)$_GET['user_id']; // Ensure user_id is an integer
+        $sql = mysqli_prepare($conn, "SELECT * FROM users WHERE unique_id = ?");
+        mysqli_stmt_bind_param($sql, "i", $user_id);
+        mysqli_stmt_execute($sql);
+        $result = mysqli_stmt_get_result($sql);
+
+        if (mysqli_num_rows($result) > 0) {
+          $row = mysqli_fetch_assoc($result);
         } else {
           header("location: users.php");
+          exit; // Exit to prevent further execution
         }
         ?>
-        <!-- Displays the back icon, user's image, name, and status (the image, names and status are dynamically loaded)-->
+        <!-- Displays the back icon, user's image, name, and status (the image, names, and status are dynamically loaded)-->
         <a href="users.php" class="back-icon"><i class="fas fa-arrow-left"></i></a>
-        <img src="php/images/<?php echo $row['img']; ?>" alt="">
+        <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="">
         <div class="details">
-          <span><?php echo $row['fname'] . " " . $row['lname'] ?></span>
-          <p><?php echo $row['status']; ?></p>
+          <span><?php echo htmlspecialchars($row['fname']) . " " . htmlspecialchars($row['lname']); ?></span>
+          <p><?php echo htmlspecialchars($row['status']); ?></p>
         </div>
       </header>
       <!-- This is the chat box where data is dynamically loaded from the database-->

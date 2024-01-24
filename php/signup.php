@@ -1,13 +1,4 @@
 <?php
-/*  1. Receives input from a user registration form (first name, last name, email, password, and an image file).
-    2. Validates that all fields are filled and the email is in the correct format.
-    3. Checks if the email already exists in the users table in the database.
-    4. Handles the image upload by checking the file extension and MIME type, then moves the file to a permanent location.
-    5. Encrypts the password using MD5.
-    6. Inserts the new user into the database.
-    7. Sets a session variable for the newly created user ID and returns "success" if all operations are successful.
-*/
-
 // Start a new session or resume the existing session
 session_start();
 // Include the database configuration file
@@ -19,14 +10,13 @@ $lname = mysqli_real_escape_string($conn, $_POST['lname']);
 $email = mysqli_real_escape_string($conn, $_POST['email']);
 $password = mysqli_real_escape_string($conn, $_POST['password']);
 
-// Check if all form inputs are filled in
 if (!empty($fname) && !empty($lname) && !empty($email) && !empty($password)) {
     // Validate the email format
     if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         // Check if the email already exists in the database
         $sql = mysqli_query($conn, "SELECT * FROM users WHERE email = '{$email}'");
         if (mysqli_num_rows($sql) > 0) {
-            echo "$email - This email already exist!";
+            echo htmlspecialchars("$email - This email already exists!");
         } else {
             // Check if an image file was uploaded
             if (isset($_FILES['image'])) {
@@ -70,22 +60,22 @@ if (!empty($fname) && !empty($lname) && !empty($email) && !empty($password)) {
                                     $_SESSION['unique_id'] = $result['unique_id'];
                                     echo "success";
                                 } else {
-                                    echo "This email address not Exist!";
+                                    echo htmlspecialchars("This email address does not exist!");
                                 }
                             } else {
-                                echo "Something went wrong. Please try again!";
+                                echo htmlspecialchars("Something went wrong. Please try again!");
                             }
                         }
                     } else {
-                        echo "Please upload an image file - jpeg, png, jpg";
+                        echo htmlspecialchars("Please upload an image file - jpeg, png, jpg");
                     }
                 } else {
-                    echo "Please upload an image file - jpeg, png, jpg";
+                    echo htmlspecialchars("Please upload an image file - jpeg, png, jpg");
                 }
             }
         }
     } else {
-        echo "$email is not a valid email!";
+        echo htmlspecialchars("$email is not a valid email!");
     }
 } else {
     echo "All input fields are required!";

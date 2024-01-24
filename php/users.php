@@ -14,16 +14,22 @@ $sql = "SELECT * FROM users WHERE NOT unique_id = {$outgoing_id} ORDER BY user_i
 // Executes the SQL query on the database.
 $query = mysqli_query($conn, $sql);
 
-//Output Generation
-$output = "";
-//Checks if the query returned zero rows, indicating no other users are available to chat.
-if (mysqli_num_rows($query) == 0) {
-    //Appends a message to the output string if no users are found.
-    $output .= "No users are available to chat";
-} elseif (mysqli_num_rows($query) > 0) {
-    //Includes the data.php file, which is responsible for formatting the user data into a presentable format
-    //if there are one or more users found in the database.
-    include_once "data.php";
+// Check if the query was successful
+if ($query) {
+    //Output Generation
+    $output = "";
+    //Checks if the query returned zero rows, indicating no other users are available to chat.
+    if (mysqli_num_rows($query) == 0) {
+        //Appends a message to the output string if no users are found.
+        $output .= "No users are available to chat";
+    } elseif (mysqli_num_rows($query) > 0) {
+        //Includes the data.php file, which is responsible for formatting the user data into a presentable format
+        //if there are one or more users found in the database.
+        include_once "data.php";
+    }
+    //Outputs the generated string, which contains either a message indicating no available users or the formatted list of users.
+    echo $output;
+} else {
+    // Handle the case where the query execution fails
+    echo "Error executing query: " . mysqli_error($conn);
 }
-//Outputs the generated string, which contains either a message indicating no available users or the formatted list of users.
-echo $output;
