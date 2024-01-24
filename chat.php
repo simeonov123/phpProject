@@ -1,7 +1,8 @@
 <?php
-// Initializes a new session or resumes the existing one.
+//Initializes a new session or resumes the existing one.
 session_start();
-// Includes the configuration file with the DB connection.
+
+// Includes the configuration file with the database connection.
 include_once "php/config.php";
 
 // Session Check and Redirect
@@ -12,6 +13,7 @@ if (!isset($_SESSION['unique_id'])) {
 }
 ?>
 <?php include_once "header.php"; ?>
+
 <!-- Chat Area Section -->
 
 <body>
@@ -21,20 +23,18 @@ if (!isset($_SESSION['unique_id'])) {
         <?php
         // User Information Retrieval
         // Fetches the user_id from the GET request and performs a SQL query to retrieve the user's details from the database.
-        $user_id = (int)$_GET['user_id']; // Ensure user_id is an integer
-        $sql = mysqli_prepare($conn, "SELECT * FROM users WHERE unique_id = ?");
-        mysqli_stmt_bind_param($sql, "i", $user_id);
-        mysqli_stmt_execute($sql);
-        $result = mysqli_stmt_get_result($sql);
+        $user_id = mysqli_real_escape_string($conn, $_GET['user_id']);
+        $sql = mysqli_query($conn, "SELECT * FROM users WHERE unique_id = {$user_id}");
 
-        if (mysqli_num_rows($result) > 0) {
-          $row = mysqli_fetch_assoc($result);
+        // If the user is found, their details are stored in $row; otherwise, the user is redirected to users.php.
+        if (mysqli_num_rows($sql) > 0) {
+          $row = mysqli_fetch_assoc($sql);
         } else {
           header("location: users.php");
           exit; // Exit to prevent further execution
         }
         ?>
-        <!-- Displays the back icon, user's image, name, and status (the image, names, and status are dynamically loaded)-->
+        <!-- Displays the back icon, user's image, name, and status (the image, names, and status are dynamically loaded) -->
         <a href="users.php" class="back-icon"><i class="fas fa-arrow-left"></i></a>
         <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="">
         <div class="details">
@@ -42,12 +42,12 @@ if (!isset($_SESSION['unique_id'])) {
           <p><?php echo htmlspecialchars($row['status']); ?></p>
         </div>
       </header>
-      <!-- This is the chat box where data is dynamically loaded from the database-->
-      <div class="chat-box">
 
-      </div>
+      <!-- This is the chat box where data is dynamically loaded from the database -->
+      <div class="chat-box"></div>
+
       <!-- Message Typing Area: A form for sending messages, with an input field for the message and a send button.
-         Includes a hidden field (incoming_id) that holds the user ID of the chat partner. -->
+           Includes a hidden field (incoming_id) that holds the user ID of the chat partner. -->
       <form action="#" class="typing-area">
         <input type="text" class="incoming_id" name="incoming_id" value="<?php echo $user_id; ?>" hidden>
         <input type="text" name="message" class="input-field" placeholder="Type a message here..." autocomplete="off">
@@ -55,9 +55,9 @@ if (!isset($_SESSION['unique_id'])) {
       </form>
     </section>
   </div>
-  <!-- Responsible for handling real-time chat functionalities, such as sending messages, receiving messages, and updating the chat box.-->
-  <script src="javascript/chat.js"></script>
 
+  <!-- Responsible for handling real-time chat functionalities, such as sending messages, receiving messages, and updating the chat box. -->
+  <script src="javascript/chat.js"></script>
 </body>
 
 </html>

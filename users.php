@@ -3,15 +3,18 @@
   The user dashboard page is the main interface for logged-in users to interact with the chat application. 
   It displays the current user's information and provides a search feature to find other users to start a chat with.
 */
-//Initializes a new session or resumes an existing one.
+
+// Initializes a new session or resumes an existing one.
 session_start();
-//Includes the database configuration file.
+
+// Includes the database configuration file.
 include_once "php/config.php";
-//Checks if the session variable for unique_id is set.
+
+// Checks if the session variable for unique_id is set.
 if (!isset($_SESSION['unique_id'])) {
-  //Redirects to the login page if the session variable is not set.
+  // Redirects to the login page if the session variable is not set.
   header("location: login.php");
-  exit(); // Terminate script to prevent further execution
+  exit(); // Terminate script execution to prevent further processing.
 }
 ?>
 <?php include_once "header.php"; ?>
@@ -23,35 +26,34 @@ if (!isset($_SESSION['unique_id'])) {
       <header>
         <div class="content">
           <?php
-          //Fetches the current logged-in user's details from the database.
-          $sql = "SELECT * FROM users WHERE unique_id = ?";
-          // Prepare a statement to avoid SQL injection
-          $stmt = mysqli_prepare($conn, $sql);
-          mysqli_stmt_bind_param($stmt, "i", $_SESSION['unique_id']);
-          mysqli_stmt_execute($stmt);
-          $result = mysqli_stmt_get_result($stmt);
+          // Fetches the current logged-in user's details from the database using prepared statements.
+          $sql = mysqli_prepare($conn, "SELECT fname, lname, status, img FROM users WHERE unique_id = ?");
+          mysqli_stmt_bind_param($sql, "i", $_SESSION['unique_id']);
+          mysqli_stmt_execute($sql);
+          mysqli_stmt_store_result($sql);
 
-          if (mysqli_num_rows($result) > 0) {
-            $row = mysqli_fetch_assoc($result);
+          if (mysqli_stmt_num_rows($sql) > 0) {
+            mysqli_stmt_bind_result($sql, $fname, $lname, $status, $img);
+            mysqli_stmt_fetch($sql);
           }
           ?>
           <!-- Displays the user's image, full name, and status -->
-          <img src="php/images/<?php echo htmlspecialchars($row['img']); ?>" alt="">
+          <img src="php/images/<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="">
           <div class="details">
-            <span><?php echo htmlspecialchars($row['fname'] . " " . $row['lname']); ?></span>
-            <p><?php echo htmlspecialchars($row['status']); ?></p>
+            <span><?php echo htmlspecialchars($fname . " " . $lname, ENT_QUOTES, 'UTF-8'); ?></span>
+            <p><?php echo htmlspecialchars($status, ENT_QUOTES, 'UTF-8'); ?></p>
           </div>
         </div>
         <!-- Logout Functionality -->
         <!-- Provides a logout link that passes the user's unique_id to logout.php via a query string. -->
-        <a href="php/logout.php?logout_id=<?php echo htmlspecialchars($row['unique_id']); ?>" class="logout">Logout</a>
+        <a href="php/logout.php?logout_id=<?php echo htmlspecialchars($_SESSION['unique_id'], ENT_QUOTES, 'UTF-8'); ?>" class="logout">Logout</a>
       </header>
       <!-- User Search Feature -->
       <!-- Includes a text field and button for searching other users by name. -->
       <div class="search">
         <span class="text">Select a user to start a chat</span>
-        <input type="text" placeholder="Enter name to search...">
-        <button><i class="fas fa-search"></i></button>
+        <input type="text" placeholder="Enter name to search..." id="searchInput">
+        <button id="searchButton"><i class="fas fa-search"></i></button>
       </div>
       <!-- User List Container -->
       <div class="users-list">

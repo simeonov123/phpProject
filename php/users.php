@@ -2,34 +2,46 @@
 /*
     This PHP script retrieves and displays a list of all registered users except the one who is currently logged in.
 */
-//session_start(): Initializes a new session or resumes an existing one to access session variables.
+
+// Initializes a new session or resumes an existing one to access session variables.
 session_start();
-//include_once "config.php": Includes the database configuration file, which contains the database connection settings.
+
+// Include the database configuration file, which contains the database connection settings.
 include_once "config.php";
-//Retrieve Current User ID
+
+// Retrieve the current user's unique_id (user ID).
 $outgoing_id = $_SESSION['unique_id'];
 
-//Constructs an SQL query to select all users from the database except the current user, ordered by their user ID in descending order.
-$sql = "SELECT * FROM users WHERE NOT unique_id = {$outgoing_id} ORDER BY user_id DESC";
-// Executes the SQL query on the database.
-$query = mysqli_query($conn, $sql);
+// Construct an SQL query using prepared statements to select all users from the database except the current user.
+$sql = "SELECT * FROM users WHERE NOT unique_id = ? ORDER BY user_id DESC";
 
-// Check if the query was successful
-if ($query) {
-    //Output Generation
+// Prepare the mysql statement
+$stmt = mysqli_prepare($conn, $sql);
+if ($stmt) {
+    // Bind the outgoing_id as a parameter
+    mysqli_stmt_bind_param($stmt, "i", $outgoing_id);
+
+    // Execute the statement
+    mysqli_stmt_execute($stmt);
+
+    // Get the result
+    $query = mysqli_stmt_get_result($stmt);
+
+    // Initialize an empty string for output.
     $output = "";
-    //Checks if the query returned zero rows, indicating no other users are available to chat.
+
     if (mysqli_num_rows($query) == 0) {
-        //Appends a message to the output string if no users are found.
+        // Append a message to the output string if no users are found.
         $output .= "No users are available to chat";
     } elseif (mysqli_num_rows($query) > 0) {
-        //Includes the data.php file, which is responsible for formatting the user data into a presentable format
-        //if there are one or more users found in the database.
+        // Include the "data.php" file, which is responsible for formatting the user data into a presentable format
+        // if there are one or more users found in the database.
         include_once "data.php";
     }
-    //Outputs the generated string, which contains either a message indicating no available users or the formatted list of users.
+
+    // Output the generated string, which contains either a message indicating no available users or the formatted list of users.
     echo $output;
 } else {
-    // Handle the case where the query execution fails
-    echo "Error executing query: " . mysqli_error($conn);
+    // Handle SQL statement preparation error
+    echo "Error preparing SQL statement";
 }
